@@ -9,12 +9,7 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(38400);
 
-  Serial.println("Initializing I2C devices...");
   mpu.initialize();
-
-  Serial.println("Testing device connections...");
-  Serial.println(mpu.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
-
 }
 
 void loop() {
