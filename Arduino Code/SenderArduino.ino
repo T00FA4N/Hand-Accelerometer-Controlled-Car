@@ -1,6 +1,6 @@
 char message[4] = "Left";
 
-void setup() {a
+void setup() {
   Serial.begin(9600);
 }
 
