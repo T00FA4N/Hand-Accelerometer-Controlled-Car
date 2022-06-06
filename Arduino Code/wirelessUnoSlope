@@ -10,6 +10,7 @@
 #define rBound -15800
 
 #define minimum 100
+#define maximum 255
 
 MPU6050 mpu;
 int16_t ax, ay, az;
@@ -32,44 +33,35 @@ void setup() {
 
 //takes in read val and boundary to find speed
 void calcSpeed(int r, int b){
-//  int spd = abs((r*255)/b);
-  Serial.print("Speed: "); Serial.println(spd);
-  Serial.print("r: "); Serial.println(r);
-  Serial.print("b: "); Serial.println(b);
-//  int spd = 5;
+  int spd = (255.0*r/b);
+
+  //set speed to min/max value if too small/large
   if (spd < minimum){
     spd = minimum;
   }
-  
+  else if (spd > maximum){
+    spd = maximum;
+  }
+
+  //checks for spd <10 (doesn't happen as of right now - need higher voltage)
+  // 10<= spd <100 (also doesn't happen yet)
+  //spd > 100
   if (spd/10 == 0){
-//    message[4] = char(0);
-//    message[5] = char(0);
-//    message[6] = char(spd);
       //#, dest, base
       itoa(0, message+4, 10);
       itoa(0, message+5, 10);
       itoa(spd, message+6, 10);
   }
   else if (spd/100 == 0){
-//    message[4] = char(0);
-//    message[5] = char(spd / 10);
-//    message[6] = char(spd % 10);
       itoa(0, message+4, 10);
       itoa((spd/10), message+5, 10);
       itoa((spd%10), message+6, 10);
   }
   else {
-//    message[4] = char(spd/100);
-//    message[5] = char(spd/10)%10;
-//    message[6] = char(spd%10);
       itoa((spd/100), message+4, 10);
       itoa((spd/10)%10, message+5, 10);
       itoa((spd%10), message+6, 10);
   }
-
-//    itoa(1, message+4, 10);
-//    message[5] = '1';
-//    message[6] = '1';
     message[7] = '\0';
 }
 
@@ -104,9 +96,8 @@ void loop() {
     }
   }
 
-//  trans.send((uint8_t *)message, strlen(message));
-//  trans.waitPacketSent(); 
-  Serial.println(message);
+  trans.send((uint8_t *)message, strlen(message));
+  trans.waitPacketSent(); 
   
   delay(1000);
 }
