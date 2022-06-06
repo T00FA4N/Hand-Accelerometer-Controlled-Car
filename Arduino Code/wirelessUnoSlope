@@ -1,0 +1,103 @@
+#include "I2Cdev.h"
+#include "MPU6050.h"
+#include <RH_ASK.h>
+#include <SPI.h>
+
+#define fBound -16000
+#define sBound 1
+#define bBound 16000
+#define lBound 16000
+#define rBound -15800
+
+MPU6050 mpu;
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
+
+RH_ASK trans;
+char vals[3];
+//char s[3] = "111";
+char *message = "";
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(38400);
+
+  mpu.initialize();
+  if (!trans.init()) {
+    Serial.println("init failed");
+  }
+}
+
+//takes in read val and boundary to find speed
+void calcSpeed(int r, int b){
+  int spd = abs((r*255)/b);
+//  if (spd/10 == 0){
+//    message[4] = char(0);
+//    message[5] = char(0);
+//    message[6] = char(spd);
+//  }
+//  else if (spd/100 == 0){
+//    message[4] = char(0);
+//    message[5] = char(spd / 10);
+//    message[6] = char(spd % 10);
+//  }
+//  else {
+//    message[4] = char(spd/100);
+//    message[5] = char(spd/10)%10;
+//    message[6] = char(spd%10);
+//  }
+    message[4] = '\x42';
+    message[5] = '\x42';
+    message[6] = '\x42';
+//    message[7] = "\0";
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+//S = stop, L = Left, R = Right
+//F = Forward, B = Back, C = Continue
+  if (az > 14000) {
+    strcpy(message, "Stop");
+    message = "Stop";
+    calcSpeed(0, sBound);
+//    strncat(message, s, 4);
+    strncat(message, "\0", 7);
+  }
+  else if (ax >= 6000) {
+    strcpy(message, "Left");
+    calcSpeed(ax, lBound);
+//    strncat(message, s, 4);
+//    strncat(message, "\0", 7);
+  }
+  else if (ax < -5000) {
+    strcpy(message, "Rght");
+    calcSpeed(ax, rBound);
+//    strncat(message, s, 4);
+//    strncat(message, "\0", 7);
+  }
+  else if (ay < -5000) {
+    strcpy(message, "Forw");
+    calcSpeed(ay, fBound);
+//    strncat(message, s, 4);
+//    strncat(message, "\0", 7);
+  }
+  else if (ay > 6400 || az > 13000) {
+    strcpy(message, "Back");
+    if (ay > 6400) {
+      calcSpeed(ay, bBound);
+    }
+    else {
+      calcSpeed(az, bBound);
+    }
+//    strncat(message, s, 4);
+//    strncat(message, "\0", 7);
+  }
+
+//  trans.send((uint8_t *)message, strlen(message));
+//  trans.waitPacketSent(); 
+  Serial.println(message);
+  
+  delay(1000);
+}
