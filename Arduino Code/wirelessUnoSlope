@@ -3,6 +3,16 @@
 #include <RH_ASK.h>
 #include <SPI.h>
 
+/*
+ * Using Arduino Uno and 433MHz Transmitter
+ * 
+ * Uno --> Transmitter
+ * 12 --> 1
+ * 5V --> 2
+ * Gnd --> 3
+ * 
+*/
+
 #define fBound -16000
 #define sBound 1
 #define bBound 16000
