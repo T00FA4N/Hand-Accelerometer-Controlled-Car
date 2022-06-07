@@ -95,7 +95,7 @@ void loop() {
       calcSpeed(az, bBound);
     }
   }
-
+  Serial.print(message);
   trans.send((uint8_t *)message, strlen(message));
   trans.waitPacketSent(); 
   
