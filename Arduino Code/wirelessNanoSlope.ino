@@ -4,17 +4,18 @@
 
 /*
  * Using Arduino Nano and TB6612FNG Motor Driver
- * 9 --> STBY
- * 8/7, 4/5 --> A/BIN1/2
- * 6/5 --> PWMA/B
- * 3v3 --> Vcc
+ * 
+ * Nano --> Motor Driver
+ * 5V --> Vcc
+ * D9 --> STBY
+ * D8/7 --> AIN1/2
+ * D6/5 --> PWMA/B
+ * D4/3 --> BIN1/2
  * Gnd --> Gnd
  * 
- * Nano --> Uno
- * RX(0) --> TX(1)
- * TX(1) --> RX(0)
- * Gnd --> Gnd
- * 5V --> Vin
+ * Battery +/- --> VM/Gnd
+ * Motor 1 +/- --> A01/2
+ * Motor 2 +/- --> B01/2
 */
 
 #define AIN1 8
@@ -34,6 +35,7 @@ Motor m2 = Motor(BIN1, BIN2, PWMB, offsetB, STBY);
 RH_ASK receiver;
 
 char direct[5];
+char spdArr[4];
 
 void setup() {
   Serial.begin(38400);
@@ -48,20 +50,34 @@ void loop() {
   
   //if message from uno is correct length
   if (receiver.recv(message, &len)){
-    int i, j, spd;
-
+    int i, j, k, spd;
     //copy direction to corresponding array
     for (i = 0; i < 4; i++){
       direct[i] = message[i];
     }
     direct[4] = '\0';
 
+//    Serial.println(direct);
+
+    for (j = 0; j < 3; j++){
+      spdArr[j] = message[4 + j];
+    }
+    spdArr[3] = '\0';
+
+//    Serial.println(spdArr);
+
+    spd = ((int)spdArr[0] - 48)*100 + ((int)spdArr[1] - 48)*10 + ((int)spdArr[2] - 48);
+
+    Serial.print(direct); Serial.println(spd);
+//    Serial.println(fast);
     //copy speed to corresponding var
-    spd = (int)message[4]*100 + (int)message[5]*10 + (int)message[6];
-    
+    //conversion to int is problematic
+
+//    Serial.print("Direct: ");Serial.println(direct);
+//    Serial.print("Speed: ");Serial.println(spd);
     //determine direction to go at speed defined
     if (strcmp(direct, "Stop") == 0) {
-        brake(m1, m2);
+       brake(m1, m2);
     }
     else if (strcmp(direct, "Left") == 0) {
         m1.drive(spd);
