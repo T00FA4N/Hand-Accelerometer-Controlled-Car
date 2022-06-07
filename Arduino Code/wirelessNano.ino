@@ -5,17 +5,18 @@
 
 /*
  * Using Arduino Nano and TB6612FNG Motor Driver
- * 9 --> STBY
- * 8/7, 4/5 --> A/BIN1/2
- * 6/5 --> PWMA/B
- * 3v3 --> Vcc
+ * 
+ * Nano --> Motor Driver
+ * 5V --> Vcc
+ * D9 --> STBY
+ * D8/7 --> AIN1/2
+ * D6/5 --> PWMA/B
+ * D4/3 --> BIN1/2
  * Gnd --> Gnd
  * 
- * Nano --> Uno
- * RX(0) --> TX(1)
- * TX(1) --> RX(0)
- * Gnd --> Gnd
- * 5V --> Vin
+ * Battery +/- --> VM/Gnd
+ * Motor 1 +/- --> A01/2
+ * Motor 2 +/- --> B01/2
 */
 
 #define AIN1 8
