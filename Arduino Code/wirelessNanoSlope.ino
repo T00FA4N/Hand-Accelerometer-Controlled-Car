@@ -6,12 +6,17 @@
  * Using Arduino Nano and TB6612FNG Motor Driver
  * 
  * Nano --> Motor Driver
- * 5V --> Vcc
+ * 3.3V --> Vcc
  * D9 --> STBY
  * D8/7 --> AIN1/2
  * D6/5 --> PWMA/B
  * D4/3 --> BIN1/2
  * Gnd --> Gnd
+ * 
+ * Nano --> Receiver
+ * 5V --> 1
+ * D11 --> 3
+ * Gnd --> 4
  * 
  * Battery +/- --> VM/Gnd
  * Motor 1 +/- --> A01/2
@@ -57,24 +62,15 @@ void loop() {
     }
     direct[4] = '\0';
 
-//    Serial.println(direct);
-
+    //get speed values
     for (j = 0; j < 3; j++){
       spdArr[j] = message[4 + j];
     }
-    spdArr[3] = '\0';
+    spdArr[3] = '\0';]
 
-//    Serial.println(spdArr);
-
+    //convert speed to integer
     spd = ((int)spdArr[0] - 48)*100 + ((int)spdArr[1] - 48)*10 + ((int)spdArr[2] - 48);
 
-    Serial.print(direct); Serial.println(spd);
-//    Serial.println(fast);
-    //copy speed to corresponding var
-    //conversion to int is problematic
-
-//    Serial.print("Direct: ");Serial.println(direct);
-//    Serial.print("Speed: ");Serial.println(spd);
     //determine direction to go at speed defined
     if (strcmp(direct, "Stop") == 0) {
        brake(m1, m2);
