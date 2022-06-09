@@ -18,7 +18,7 @@
  * D11 --> 3
  * Gnd --> 4
  * 
- * Battery +/- --> VM/Gnd
+ * 9V Battery +/- --> VM/Gnd
  * Motor 1 +/- --> A01/2
  * Motor 2 +/- --> B01/2
 */
@@ -26,10 +26,12 @@
 #define AIN1 8
 #define BIN1 4
 #define AIN2 7
-#define BIN2 3
+#define BIN2 2 //3
 #define PWMA 6
 #define PWMB 5
 #define STBY 9
+
+#define led 13
 
 const int offsetA = 1;
 const int offsetB = 1;
@@ -47,6 +49,9 @@ void setup() {
   if (!receiver.init()){
     Serial.println("init failed");
   }
+
+  pinMode(led, OUTPUT);
+  pinMode(buzzer, OUTPUT);
 }
 
 void loop() {
@@ -61,12 +66,13 @@ void loop() {
       direct[i] = message[i];
     }
     direct[4] = '\0';
+    digitalWrite(led, LOW);
 
     //get speed values
     for (j = 0; j < 3; j++){
       spdArr[j] = message[4 + j];
     }
-    spdArr[3] = '\0';]
+    spdArr[3] = '\0';
 
     //convert speed to integer
     spd = ((int)spdArr[0] - 48)*100 + ((int)spdArr[1] - 48)*10 + ((int)spdArr[2] - 48);
@@ -87,8 +93,9 @@ void loop() {
         back(m1, m2, -1*spd);
     }
     else if (strcmp(direct, "Back") == 0) {
+        digitalWrite(led, HIGH);
         forward(m1, m2, spd);
     }
   }
-  delay(1000);
+  delay(250);
 }
