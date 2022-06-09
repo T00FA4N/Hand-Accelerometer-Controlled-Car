@@ -76,7 +76,6 @@ void calcSpeed(int r, int b){
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
 //S = stop, L = Left, R = Right
@@ -109,5 +108,5 @@ void loop() {
   trans.send((uint8_t *)message, strlen(message));
   trans.waitPacketSent(); 
   
-  delay(1000);
+  delay(250);
 }
