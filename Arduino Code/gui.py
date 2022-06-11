@@ -28,6 +28,7 @@ def animate(i):
         data = pd.read_csv("./data.csv", usecols=col_list)
         time_vals = data["time"].astype(float)
         status = "Running"
+        direction = data["direction"]
         time = round(data["time"].tolist()[-1], 2)
         # This is the information you would get for speed, acceleration, and more. You can create a method above to solve it, if that's easier
         speed = round(sqrt())
@@ -46,6 +47,7 @@ def animate(i):
 
         text = f"""
 Status: {status}
+Direction: {direction}
 Time: {time}s
 Speed: {speed}m/s
 Acceleration: {acceleration}m/s^2
