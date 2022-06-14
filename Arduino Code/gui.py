@@ -1,4 +1,5 @@
 from math import sqrt
+from re import S
 from time import sleep
 from threading import Thread
 
@@ -8,18 +9,17 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import pandas as pd
 
-sleep(1)
+sleep(1)        
 
-        
+plt.style.use('dark_background')
 
 col_list = open("./data.csv", "r").readline().replace("\n", "").split(",")
 rcParams["toolbar"] = "None"
-gs = GridSpec(3, 3)
+gs = GridSpec(3, 3, hspace=0.4)
 fig = plt.figure(figsize=(16, 9))
 fig.canvas.manager.set_window_title("Hand Accelerometer Controlled Car Live GUI")
 thismanager = plt.get_current_fig_manager()
 thismanager.window.wm_iconbitmap("") # Include filename of picture of icon on the GUI
-
 
 def animate(i):
     try:
@@ -27,11 +27,14 @@ def animate(i):
         data = pd.read_csv("./data.csv", usecols=col_list)
         time_vals = data["time"].astype(float)
         status = "Running"
-        direction = data["direction"]
+        direction = data["direction"].tolist()[-1]
         time = round(data["time"].tolist()[-1], 2)
-        # This is the information you would get for speed, acceleration, and more. You can create a method above to solve it, if that's easier
+        xAccel = data["aX"].astype(float).tolist()[-1]
+        yAccel = data["aY"].astype(float).tolist()[-1]
+        zAccel = data["aZ"].astype(float).tolist()[-1]
         speed = data["speed"].astype(float)
-        acceleration = 0 # Replace with calculated values
+        acceleration = round((xAccel**2 + yAccel**2 + zAccel**2)**(1/2) - 400, 2)
+        
 
         gX, gY, gZ = (
             round(data["gX"].tolist()[-1], 2),
@@ -45,12 +48,13 @@ def animate(i):
         ax.get_yaxis().set_visible(False)
 
         text = f"""
-Status: {status}
-Direction: {direction}
-Time: {time}s
-Speed: {speed}m/s
-Acceleration: {acceleration}m/s^2
-Rotation: ({gX}, {gY}, {gZ})"""
+        Status: {status}
+        Time: {time}s
+        Direction: {direction}
+        Speed: {speed.tolist()[-1]}m/s
+        Acceleration: {acceleration}m/s^2
+        Rotation: ({gX}, {gY}, {gZ})
+        """
 
         ax.annotate(
             text,
@@ -71,10 +75,10 @@ Rotation: ({gX}, {gY}, {gZ})"""
         plt.plot(time_vals, data["gZ"].astype(float), label="z", color="green")
         ax.set_title("Gyroscope")
         ax.legend(loc="upper left")
-        
-        ax = plt.subplot(gs[1, 0:2])
-        plt.plot(time_vals, speed, label="Velocity", color="black")
+        ax = plt.subplot(gs[2, 0:2])
+        plt.plot(time_vals, speed, label="Velocity", color="purple")
         ax.set_title("Speed")
+        ax.set_ylim([0, 260])
         ax.legend(loc="upper left")
 
         ax = plt.subplot(gs[1, 2])
@@ -84,17 +88,10 @@ Rotation: ({gX}, {gY}, {gZ})"""
         ax.set_title("Accelerometer")
         ax.legend(loc="upper left")
 
-        ax = plt.subplot(gs[2, 0:2])
-        plt.plot(time_vals, speed, label="Acceleration", color="black")
+        ax = plt.subplot(gs[1, 0:2])
+        plt.plot(time_vals, speed, label="Acceleration", color="orange")
         ax.set_title("Acceleration")
         ax.legend(loc="upper left")
-
-        """ax=plt.subplot(gs[2, 2])
-        plt.plot(time_vals, fdirec, label="pos f", color="red")
-        plt.plot(time_vals, bdirec, label="pos b", color ="blue")
-        plt.plot(time_vals, ldirec, label="pos l", color ="green")
-        plt.plot(time_vals, rdirec, label="pos r", color="yellow")
-        """
 
     except Exception as e:
         print(e)
