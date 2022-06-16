@@ -1,25 +1,37 @@
 #include <SparkFun_TB6612.h>
 #include <RH_ASK.h>
 #include <SPI.h>
-//#include <Servo.h>
 #include <ServoTimer2.h>
 
 /*
  * Using Arduino Nano and TB6612FNG Motor Driver
+ * Based on wireless input from Arduino Uno controls
+ * speed and direction of motors, and opens or closes
+ * servo
  * 
  * Nano --> Motor Driver
  * 3.3V --> Vcc
  * D9 --> STBY
  * D8/7 --> AIN1/2
  * D6/5 --> PWMA/B
- * D4/3 --> BIN1/2
+ * D4/2 --> BIN1/2
  * Gnd --> Gnd
  * 
  * Nano --> Receiver
- * 5V --> 1
- * D11 --> 3
- * Gnd --> 4
+ * 5V --> Vcc (1)
+ * D11 --> Data (3)
+ * Gnd --> Gnd (4)
  * 
+ * Nano --> LED
+ * D13 --> LED +
+ * Gnd --> LED -
+ * 
+ * Nano --> Servo
+ * 5V --> +
+ * Gnd --> Gnd
+ * D3 --> Signal
+ * 
+ * Additional Connections
  * 9V Battery +/- --> VM/Gnd
  * Motor 1 +/- --> A01/2
  * Motor 2 +/- --> B01/2
@@ -28,7 +40,7 @@
 #define AIN1 8
 #define BIN1 4
 #define AIN2 7
-#define BIN2 2 //3
+#define BIN2 2
 #define PWMA 6
 #define PWMB 5
 #define STBY 9
@@ -51,6 +63,9 @@ char spdArr[4];
 int past;
 int ser;
 
+uint8_t message[9];
+uint8_t len = sizeof(message);
+
 void setup() {
   Serial.begin(38400);
   if (!receiver.init()){
@@ -62,8 +77,6 @@ void setup() {
 }
 
 void loop() {
-  uint8_t message[9];
-  uint8_t len = sizeof(message);
   servo.write(pos);
   
   //if message from uno is correct length
@@ -94,41 +107,41 @@ void loop() {
     }
 
     Serial.println(direct);
-    
+
+    //Check for direction, then drive motors at spd
     if (strcmp(direct, "Stop") == 0) {
         m1.drive(0, 250);
         m2.drive(0, 250);
-//        Serial.println("STOP!");
     }
     else if (strcmp(direct, "Left") == 0) {
-        m1.drive(spd, 200);
-        m2.drive(-1*spd, 200);
-        m1.drive(0, 25);
-        m2.drive(0, 25);
-    }
-    else if (strcmp(direct, "Rght") == 0) {
         m1.drive(-1*spd, 200);
         m2.drive(spd, 200);
         m1.drive(0, 25);
         m2.drive(0, 25);
     }
+    else if (strcmp(direct, "Rght") == 0) {
+        m1.drive(spd, 200);
+        m2.drive(-1*spd, 200);
+        m1.drive(0, 25);
+        m2.drive(0, 25);
+    }
     else if (strcmp(direct, "Forw") == 0) {
-      for (int n = 0; n < 4; n++){
+      for (int n = 0; n < 6; n++){
         m1.drive(-1*spd, 50);
         m2.drive(-1*spd, 50);
       }
-      m1.drive(0, 10);
-      m2.drive(0, 10);
+      m1.drive(0, 5);
+      m2.drive(0, 5);
     }
     else if (strcmp(direct, "Back") == 0) {
       digitalWrite(led, HIGH);
-      for (int n = 0; n < 4; n++){
+      for (int n = 0; n < 6; n++){
         m1.drive(spd, 50);
         m2.drive(spd, 50);
       }
+      m1.drive(0, 5);
+      m2.drive(0, 5);
       digitalWrite(led, LOW);
-        m1.drive(0, 10);
-        m2.drive(0, 10);
     }
   }
 }
