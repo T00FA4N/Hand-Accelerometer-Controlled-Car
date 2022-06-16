@@ -1,3 +1,5 @@
+#Writes data to csv
+
 from time import sleep
 import serial
 
