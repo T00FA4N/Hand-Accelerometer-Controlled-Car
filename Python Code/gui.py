@@ -1,3 +1,5 @@
+#Create GUI from CSV file
+
 from math import sqrt
 from re import S
 from time import sleep
@@ -19,7 +21,7 @@ gs = GridSpec(3, 3, hspace=0.4)
 fig = plt.figure(figsize=(16, 9))
 fig.canvas.manager.set_window_title("Hand Accelerometer Controlled Car Live GUI")
 thismanager = plt.get_current_fig_manager()
-thismanager.window.wm_iconbitmap("") # Include filename of picture of icon on the GUI
+thismanager.window.wm_iconbitmap("")
 
 def animate(i):
     try:
@@ -47,6 +49,7 @@ def animate(i):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
+        #plot text
         text = f"""
         Status: {status}
         Time: {time}s
@@ -69,6 +72,7 @@ def animate(i):
         ax.spines['bottom'].set_visible(False)
         ax.spines['left'].set_visible(False)
 
+        #plot graphs
         ax = plt.subplot(gs[0, 1:])
         plt.plot(time_vals, data["gX"].astype(float), label="x", color="red")
         plt.plot(time_vals, data["gY"].astype(float), label="y", color="blue")
@@ -92,13 +96,6 @@ def animate(i):
         plt.plot(time_vals, speed, label="Acceleration", color="orange")
         ax.set_title("Acceleration")
         ax.legend(loc="upper left")
-
-        """ax=plt.subplot(gs[2, 2])
-        plt.plot(time_vals, fdirec, label="pos f", color="red")
-        plt.plot(time_vals, bdirec, label="pos b", color ="blue")
-        plt.plot(time_vals, ldirec, label="pos l", color ="green")
-        plt.plot(time_vals, rdirec, label="pos r", color="yellow")
-        """
 
     except Exception as e:
         print(e)
