@@ -5,12 +5,27 @@
 
 /*
  * Using Arduino Uno and 433MHz Transmitter
+ * Creates message to send to Arduino Nano
+ * based on input from the accelerometer
+ * and button. Also writes values to serial
+ * port for the GUI
+ * 
+ * Uno --> Accelerometer
+ * 5V --> Vcc
+ * Gnd --> Gnd
+ * A4 --> SDA
+ * A5 --> SCL
  * 
  * Uno --> Transmitter
- * 12 --> 1
- * 5V --> 2
- * Gnd --> 3
+ * 12 --> Data (1)
+ * 5V --> + (2)
+ * Gnd --> Gnd (3)
  * 
+ * Uno --> Button
+ * 13 --> Button Pin
+ * 5V --> Button Pin
+ * Gnd --> Button Pin
+ * Note: Resistor between connection to gnd and output wire
 */
 
 #define button 13
@@ -50,7 +65,6 @@ void setup() {
 //takes in read val and boundary to find speed
 void calcSpeed(int r, int b){
   int spd = (255.0*r/b);
-  Serial.print(spd);Serial.print(",");
 
   //set speed to min/max value if too small/large
   if (spd < minimum){
@@ -60,9 +74,7 @@ void calcSpeed(int r, int b){
     spd = maximum;
   }
 
-  //checks for spd <10 (doesn't happen as of right now - need higher voltage)
-  // 10<= spd <100 (also doesn't happen yet)
-  //spd > 100
+  Serial.print(spd);Serial.print(",");
   if (spd/10 == 0){
       //#, dest, base
       itoa(0, message+4, 10);
@@ -89,14 +101,15 @@ void loop() {
   if (digitalRead(button) == HIGH){
     servo = 1-servo;
   }
+
+//time for gui
+  Serial.print(millis()/1000);Serial.print(",");
   
-//  Serial.write(millis() + '\n');
-  Serial.println(millis()/1000);
 //S = stop, L = Left, R = Right
 //F = Forward, B = Back, C = Continue
   if (az > 14000) {
-    Serial.write("Stop,");
-    Serial.write("0,");
+    Serial.print("Stop,");
+    Serial.print("0,");
     if (servo){
       strcpy(message, "Stop0001\0");
     }
@@ -105,22 +118,22 @@ void loop() {
     }
   }
   else if (ax >= 6000) {
-    Serial.write("Left,");
+    Serial.print("Left,");
     strcpy(message, "Left");
     calcSpeed(ax, lBound);
   }
   else if (ax < -5000) {
-    Serial.write("Right,");
+    Serial.print("Right,");
     strcpy(message, "Rght");
     calcSpeed(ax, rBound);
   }
   else if (ay < -5000) {
-    Serial.write("Forward,");
+    Serial.print("Forward,");
     strcpy(message, "Forw");
     calcSpeed(ay, fBound);
   }
   else if (ay > 6400 || az > 13000) {
-    Serial.write("Back,");
+    Serial.print("Back,");
     strcpy(message, "Back");
     if (ay > 6400) {
       calcSpeed(ay, bBound);
@@ -130,12 +143,15 @@ void loop() {
     }
   }
 
+  //sending data to gui
   Serial.print(ax);Serial.print(",");
   Serial.print(ay);Serial.print(",");
   Serial.print(az);Serial.print(",");
   Serial.print(gx);Serial.print(",");
   Serial.print(gy);Serial.print(",");
-  Serial.print(gz);Serial.print("\0");
+  Serial.print(gz);Serial.print('\n');
+
+  //sending data to nano
   trans.send((uint8_t *)message, strlen(message));
   trans.waitPacketSent(); 
   delay(250);
